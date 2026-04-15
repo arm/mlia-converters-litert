@@ -43,6 +43,7 @@ source = "uv-dynamic-versioning"
 # Include implicit namespace packages under src/.
 only-include = ["src/mlia"]
 sources = ["src"]
+artifacts = ["src/mlia/_vendor/artifacts/tosa-converter-for-tflite/*.whl"]
 
 [tool.hatch.build.targets.sdist]
 include = [

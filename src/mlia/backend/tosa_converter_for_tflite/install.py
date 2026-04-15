@@ -4,10 +4,19 @@
 
 from __future__ import annotations
 
+from functools import cache
+import logging
+import shutil
+import importlib
+import sys
+
 from mlia.backend.install import (
+    InstallFromVendorPackage,
     Installation,
     PyPackageBackendInstallation,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def get_tosa_converter_for_tflite_backend_installation() -> Installation:
@@ -19,4 +28,63 @@ def get_tosa_converter_for_tflite_backend_installation() -> Installation:
         packages_to_uninstall=["tosa-converter-for-tflite"],
         expected_packages=["tosa-converter-for-tflite"],
         vendor_path="tosa-converter-for-tflite",
+    )
+
+
+def _resolve_executable(exe_name: str) -> str | None:
+    """Resolve the converter executable from PATH."""
+    resolved = shutil.which(exe_name)
+    if resolved:
+        return resolved
+    return None
+
+
+def _module_available(module_name: str) -> bool:
+    """Return True if the module can be imported."""
+    try:
+        importlib.import_module(module_name)
+    except ModuleNotFoundError as exc:
+        if exc.name == module_name or module_name.startswith(f"{exc.name}."):
+            return False
+        raise
+    return True
+
+
+@cache
+def ensure_tosa_converter_for_tflite_installed() -> tuple[str, ...]:
+    """Ensure the TOSA converter executable is available and return argv prefix."""
+    exe_name = "tosa-converter-for-tflite"
+    module_name = "tosa_converter_for_tflite.cli"
+    importlib.invalidate_caches()
+    resolved = _resolve_executable(exe_name)
+    if resolved:
+        return (resolved,)
+    if _module_available(module_name):
+        return (sys.executable, "-m", module_name)
+
+    installation = get_tosa_converter_for_tflite_backend_installation()
+    install_type = InstallFromVendorPackage()
+
+    if not installation.supports(install_type):
+        raise RuntimeError(
+            "Auto-install failed: vendored 'tosa-converter-for-tflite' wheel "
+            "is missing from mlia-converters-tflite."
+        )
+
+    logger.info(
+        "Installing 'tosa-converter-for-tflite' from vendored package in "
+        "mlia-converters-tflite."
+    )
+    installation.install(install_type)
+
+    importlib.invalidate_caches()
+    resolved = _resolve_executable(exe_name)
+    if resolved:
+        return (resolved,)
+    if _module_available(module_name):
+        return (sys.executable, "-m", module_name)
+
+    raise RuntimeError(
+        "Auto-install succeeded but the 'tosa_converter_for_tflite' module "
+        "could not be imported."
     )
