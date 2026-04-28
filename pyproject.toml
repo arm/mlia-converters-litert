@@ -14,7 +14,8 @@ dynamic = ["version"]
 description = "ML Inference Advisor TFLite Converter Plugin"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
+license-files = ["LICENSES/*.txt"]
 authors = [
     {name = "Arm Ltd", email = "mlia@arm.com"}
 ]
@@ -47,7 +48,8 @@ artifacts = ["src/mlia/_vendor/artifacts/tosa-converter-for-tflite/*.whl"]
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "src/mlia/**"
+    "src/mlia/**",
+    "LICENSES/*.txt"
 ]
 
 [tool.hatch.build.hooks.custom]
