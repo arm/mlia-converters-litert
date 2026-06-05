@@ -22,6 +22,7 @@ entry-point system.
 - [Reporting bugs](#reporting-bugs)
 - [Development (uv)](#development-uv)
 - [Documentation](#documentation)
+- [Trademarks and copyrights](#trademarks-and-copyrights)
 
 ## Overview
 
@@ -131,3 +132,10 @@ repo lacks equivalent tooling (for example, pre-commit configuration).
 ## Documentation
 
 Additional repository documentation lives in [docs/README.md](docs/README.md).
+
+## Trademarks and copyrights
+
+- Arm is a registered trademark or trademark of Arm Limited (or its subsidiaries) in the U.S. and/or elsewhere.
+- TensorFlow is a trademark of Google LLC.
+- Linux is the registered trademark of Linus Torvalds in the U.S. and elsewhere.
+- Python is a registered trademark of the PSF.
