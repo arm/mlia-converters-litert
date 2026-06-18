@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 from pathlib import Path
 
 from mlia.backend.tosa_converter_for_tflite.install import (
@@ -24,11 +25,17 @@ logger = logging.getLogger(__name__)
 class TosaConverterForTflite:
     """Wrapper class to run the TOSA Converter For Tflite."""
 
+    SUPPORTED_KWARGS: set[str] = set()
+
     def __init__(self) -> None:
         """Set up some paths to run the TOSA Converter For Tflite."""
         self.output_consumers: list[OutputConsumer] = [
             OutputLogger(logger, logging.INFO)
         ]
+
+    def _correct_kwargs(self, kwargs: dict[str, Any]) -> bool:
+        """Return whether kwargs match the converter's supported signature."""
+        return set(kwargs).issubset(self.SUPPORTED_KWARGS)
 
     def __call__(self, tflite_file: Path, output_dir: Path) -> Path:
         """
@@ -56,6 +63,21 @@ class TosaConverterForTflite:
             logger.debug("Output file: %s", tosa_file)
 
         return tosa_file
+
+    def supports(
+        self,
+        model: object,
+        target_format: str,
+        kwargs: dict[str, Any],
+    ) -> bool:
+        """Return whether this converter can handle the given model."""
+        if target_format != "tosa":
+            return False
+        if not isinstance(model, Path):
+            return False
+        if model.suffix != ".tflite":
+            return False
+        return self._correct_kwargs(kwargs)
 
     def _create_converter_command(
         self, tflite_file: Path, tosa_file: Path, converter_cmd: tuple[str, ...]

@@ -28,13 +28,13 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence"
 ]
 dependencies = [
-    "mlia==0.11.0.dev28"
+    "mlia>=0.11.0.dev33"
 ]
 
 [project.urls]
 Homepage = "https://github.com/arm/mlia-tflite-converters.git"
 
-[project.entry-points."mlia.plugin.converter"]
+[project.entry-points."mlia.plugin.transformer"]
 tflite_to_tosa = "mlia.backend.tosa_converter_for_tflite.converter_plugin:TFLiteToTosaConverterPlugin"
 
 [tool.hatch.version]

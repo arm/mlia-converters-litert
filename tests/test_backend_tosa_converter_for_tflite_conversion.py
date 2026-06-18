@@ -48,7 +48,54 @@ def test_tosa_converter_for_tflite(
         "mlia.backend.tosa_converter_for_tflite.conversion.ensure_tosa_converter_for_tflite_installed",
         MagicMock(return_value=("tosa-converter-for-tflite",)),
     )
-    tosa_converter_for_tflite(model_file, output_dir)
+    result = tosa_converter_for_tflite(model_file, output_dir)
+
+    assert result == output_dir / f"{model_file.stem}.tosamlir"
+
+
+def test_tosa_converter_for_tflite_supports_tflite_to_tosa(
+    tosa_converter_for_tflite: TosaConverterForTflite,
+    tmp_path: Path,
+) -> None:
+    """Accept a TFLite model path when targeting TOSA with no kwargs."""
+    model_file = tmp_path / "model.tflite"
+
+    assert tosa_converter_for_tflite.supports(model_file, "tosa", {}) is True
+
+
+@pytest.mark.parametrize(
+    ("model", "target_format"),
+    [
+        pytest.param("model.tflite", "tosa", id="model-must-be-path"),
+        pytest.param(Path("model.mlir"), "tosa", id="model-must-be-tflite"),
+        pytest.param(Path("model.tflite"), "torch", id="target-must-be-tosa"),
+    ],
+)
+def test_tosa_converter_for_tflite_supports_rejects_invalid_model_or_target(
+    tosa_converter_for_tflite: TosaConverterForTflite,
+    model: object,
+    target_format: str,
+) -> None:
+    """Reject unsupported source/target combinations."""
+    assert tosa_converter_for_tflite.supports(model, target_format, {}) is False
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        pytest.param({"enable_quantization": True}, id="enable-quantization"),
+        pytest.param({"example_inputs": ["input.npy"]}, id="example-inputs"),
+    ],
+)
+def test_tosa_converter_for_tflite_supports_rejects_unsupported_kwargs(
+    tosa_converter_for_tflite: TosaConverterForTflite,
+    tmp_path: Path,
+    kwargs: dict[str, object],
+) -> None:
+    """Reject kwargs that are not supported by the wrapper."""
+    model_file = tmp_path / "model.tflite"
+
+    assert tosa_converter_for_tflite.supports(model_file, "tosa", kwargs) is False
 
 
 def test_tosa_converter_for_tflite_no_output_dir(
@@ -208,3 +255,4 @@ def test_tosa_converter_for_tflite_create_front_end_command(
     assert all(isinstance(arg, str) for arg in cmd.cmd)
     assert str(in_file) in cmd.cmd
     assert str(out_file) in cmd.cmd
+    assert "--text" in cmd.cmd

@@ -3,8 +3,10 @@
 """TFLite converter plugin module."""
 
 from mlia.backend.tosa_converter_for_tflite.conversion import TosaConverterForTflite
-from mlia.plugins.converter_registry import ConverterRegistry
 from mlia.plugins.plugins import Plugin
+
+from mlia.transformers.registry import Transformer
+from mlia.utils.registry import Registry
 
 
 class TFLiteToTosaConverterPlugin(Plugin):
@@ -13,6 +15,6 @@ class TFLiteToTosaConverterPlugin(Plugin):
     plugin_interface_version = "0.0.1"
 
     @staticmethod
-    def register(registry: ConverterRegistry) -> None:
+    def register(registry: Registry[Transformer]) -> None:
         """Register the converter with the registry."""
         registry.register("tflite_to_tosa", TosaConverterForTflite())
