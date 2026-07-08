@@ -64,6 +64,29 @@ def test_tosa_converter_for_tflite_supports_tflite_to_tosa(
 
 
 @pytest.mark.parametrize(
+    "kwargs",
+    [
+        pytest.param({"output_format": "mlir-text"}, id="text"),
+        pytest.param({"output_format": "mlir-bytecode"}, id="bytecode"),
+        pytest.param({"emit_debug_info": True}, id="debug-info"),
+        pytest.param(
+            {"output_format": "mlir-bytecode", "emit_debug_info": True},
+            id="bytecode-debug-info",
+        ),
+    ],
+)
+def test_tosa_converter_for_tflite_supports_output_options(
+    tosa_converter_for_tflite: TosaConverterForTflite,
+    tmp_path: Path,
+    kwargs: dict[str, object],
+) -> None:
+    """Accept output options used by Neural Technology transformer requests."""
+    model_file = tmp_path / "model.tflite"
+
+    assert tosa_converter_for_tflite.supports(model_file, "tosa", kwargs) is True
+
+
+@pytest.mark.parametrize(
     ("model", "target_format"),
     [
         pytest.param("model.tflite", "tosa", id="model-must-be-path"),
@@ -85,6 +108,8 @@ def test_tosa_converter_for_tflite_supports_rejects_invalid_model_or_target(
     [
         pytest.param({"enable_quantization": True}, id="enable-quantization"),
         pytest.param({"example_inputs": ["input.npy"]}, id="example-inputs"),
+        pytest.param({"output_format": "unsupported"}, id="unsupported-format"),
+        pytest.param({"emit_debug_info": "yes"}, id="invalid-debug-info"),
     ],
 )
 def test_tosa_converter_for_tflite_supports_rejects_unsupported_kwargs(
@@ -248,7 +273,7 @@ def test_tosa_converter_for_tflite_create_front_end_command(
     out_file = tmp_path / "out"
 
     cmd = tosa_converter_for_tflite._create_converter_command(
-        in_file, out_file, ("tosa-converter-for-tflite",)
+        in_file, out_file, ("tosa-converter-for-tflite",), "mlir-text"
     )
 
     assert cmd.cmd
@@ -256,3 +281,55 @@ def test_tosa_converter_for_tflite_create_front_end_command(
     assert str(in_file) in cmd.cmd
     assert str(out_file) in cmd.cmd
     assert "--text" in cmd.cmd
+
+
+def test_tosa_converter_for_tflite_create_bytecode_command(
+    tosa_converter_for_tflite: TosaConverterForTflite,
+    tmp_path: Path,
+) -> None:
+    """Bytecode output should not request text output from the converter."""
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+
+    in_file = tmp_path / "in"
+    out_file = tmp_path / "out"
+
+    cmd = tosa_converter_for_tflite._create_converter_command(
+        in_file, out_file, ("tosa-converter-for-tflite",), "mlir-bytecode"
+    )
+
+    assert "--text" not in cmd.cmd
+
+
+def test_tosa_converter_for_tflite_bytecode_output_path(
+    tosa_converter_for_tflite: TosaConverterForTflite,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Bytecode output should use the MLIR bytecode filename."""
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    model_file = tmp_path / "model.tflite"
+    model_file.touch()
+
+    monkeypatch.setattr(
+        "mlia.backend.tosa_converter_for_tflite.conversion.process_command_output",
+        MagicMock(
+            side_effect=lambda *args: (
+                output_dir / f"{model_file.stem}.tosa.mlirbc"
+            ).touch()
+        ),
+    )
+    monkeypatch.setattr(
+        "mlia.backend.tosa_converter_for_tflite.conversion.ensure_tosa_converter_for_tflite_installed",
+        MagicMock(return_value=("tosa-converter-for-tflite",)),
+    )
+
+    result = tosa_converter_for_tflite(
+        model_file,
+        output_dir,
+        output_format="mlir-bytecode",
+        emit_debug_info=True,
+    )
+
+    assert result == output_dir / f"{model_file.stem}.tosa.mlirbc"
