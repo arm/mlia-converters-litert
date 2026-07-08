@@ -5,8 +5,9 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+import re
 from pathlib import Path
+from typing import Any
 
 from mlia.backend.tosa_converter_for_tflite.install import (
     ensure_tosa_converter_for_tflite_installed,
@@ -20,6 +21,12 @@ from mlia.utils.proc import (
 )
 
 logger = logging.getLogger(__name__)
+
+_RESCALE_ATTRS_RE = re.compile(
+    r"(?P<prefix>\btosa\.rescale\b[^\n{]*\{)"
+    r"(?P<attrs>[^}\n]*)"
+    r"(?P<suffix>\})"
+)
 
 
 class TosaConverterForTflite:
@@ -140,6 +147,8 @@ class TosaConverterForTflite:
                 "No output from the TOSA Converter For Tflite found. "
                 f"File {tosa_file} does not exist."
             )
+        if output_format == "mlir-text":
+            _add_missing_rescale_rounding_modes(tosa_file)
         logger.debug(
             "TOSA Converter For Tflite run successfully. See output: %s",
             tosa_file,
@@ -150,3 +159,23 @@ class TosaConverterForTflite:
     def _extra_arguments(self, output_format: str = "mlir-text") -> list[str]:
         """Return any extra arguments to be used with the TOSA Converter For Tflite."""
         return ["--text"] if output_format == "mlir-text" else []
+
+
+def _add_missing_rescale_rounding_modes(tosa_file: Path) -> None:
+    """Add default TOSA rescale rounding modes omitted by older converter output."""
+    contents = tosa_file.read_text()
+    patched = _RESCALE_ATTRS_RE.sub(_add_missing_rescale_rounding_mode, contents)
+    if patched != contents:
+        tosa_file.write_text(patched)
+
+
+def _add_missing_rescale_rounding_mode(match: re.Match[str]) -> str:
+    attrs = match["attrs"]
+    if "rounding_mode" in attrs:
+        return match[0]
+
+    separator = ", " if attrs.strip() else ""
+    return (
+        f"{match['prefix']}{attrs}{separator}"
+        f"rounding_mode = DOUBLE_ROUND{match['suffix']}"
+    )

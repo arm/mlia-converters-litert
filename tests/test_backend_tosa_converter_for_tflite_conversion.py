@@ -301,6 +301,92 @@ def test_tosa_converter_for_tflite_create_bytecode_command(
     assert "--text" not in cmd.cmd
 
 
+def test_tosa_converter_for_tflite_patches_missing_rescale_rounding_mode(
+    tosa_converter_for_tflite: TosaConverterForTflite,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Add missing rescale rounding mode to textual TOSA MLIR output."""
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    model_file = tmp_path / "model.tflite"
+    model_file.touch()
+    output_file = output_dir / f"{model_file.stem}.tosamlir"
+
+    def _write_tosa_mlir(*_args: object) -> None:
+        output_file.write_text(
+            "\n".join(
+                [
+                    (
+                        "%0 = tosa.rescale %arg0 "
+                        "{input_unsigned = false, output_unsigned = false, "
+                        "per_channel = false, scale32 = true} : "
+                        "(tensor<1x8xi32>) -> tensor<1x8xi8>"
+                    ),
+                    (
+                        "%1 = tosa.rescale %arg1 "
+                        "{input_unsigned = false, output_unsigned = false, "
+                        "per_channel = false, rounding_mode = SINGLE_ROUND, "
+                        "scale32 = true} : "
+                        "(tensor<1x8xi32>) -> tensor<1x8xi8>"
+                    ),
+                    "%2 = tosa.add %arg0, %arg1 : (tensor<1xi32>, tensor<1xi32>) -> tensor<1xi32>",
+                ]
+            )
+        )
+
+    monkeypatch.setattr(
+        "mlia.backend.tosa_converter_for_tflite.conversion.process_command_output",
+        _write_tosa_mlir,
+    )
+    monkeypatch.setattr(
+        "mlia.backend.tosa_converter_for_tflite.conversion.ensure_tosa_converter_for_tflite_installed",
+        MagicMock(return_value=("tosa-converter-for-tflite",)),
+    )
+
+    assert tosa_converter_for_tflite(model_file, output_dir) == output_file
+
+    contents = output_file.read_text()
+    assert (
+        "{input_unsigned = false, output_unsigned = false, "
+        "per_channel = false, scale32 = true, rounding_mode = DOUBLE_ROUND}"
+    ) in contents
+    assert contents.count("rounding_mode = SINGLE_ROUND") == 1
+    assert contents.count("rounding_mode = DOUBLE_ROUND") == 1
+
+
+def test_tosa_converter_for_tflite_does_not_patch_bytecode_output(
+    tosa_converter_for_tflite: TosaConverterForTflite,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Leave bytecode output untouched."""
+    output_dir = tmp_path / "output"
+    output_dir.mkdir()
+    model_file = tmp_path / "model.tflite"
+    model_file.touch()
+    output_file = output_dir / f"{model_file.stem}.tosa.mlirbc"
+
+    monkeypatch.setattr(
+        "mlia.backend.tosa_converter_for_tflite.conversion.process_command_output",
+        MagicMock(side_effect=lambda *_args: output_file.write_bytes(b"bytecode")),
+    )
+    monkeypatch.setattr(
+        "mlia.backend.tosa_converter_for_tflite.conversion.ensure_tosa_converter_for_tflite_installed",
+        MagicMock(return_value=("tosa-converter-for-tflite",)),
+    )
+
+    assert (
+        tosa_converter_for_tflite(
+            model_file,
+            output_dir,
+            output_format="mlir-bytecode",
+        )
+        == output_file
+    )
+    assert output_file.read_bytes() == b"bytecode"
+
+
 def test_tosa_converter_for_tflite_bytecode_output_path(
     tosa_converter_for_tflite: TosaConverterForTflite,
     tmp_path: Path,
