@@ -27,6 +27,13 @@ _RESCALE_ATTRS_RE = re.compile(
     r"(?P<attrs>[^}\n]*)"
     r"(?P<suffix>\})"
 )
+_RESIZE_ATTRS_RE = re.compile(
+    r"(?P<prefix>\btosa\.resize\b[^\n{]*\{)"
+    r"(?P<attrs>[^}\n]*)"
+    r"(?P<suffix>\}[^:\n]*: .*)"
+)
+_LOCATION_DEF_RE = re.compile(r"#(?P<loc>loc\d+) = loc\(\"(?P<name>[^\"]+)\"")
+_LOCATION_REF_RE = re.compile(r"\bloc\(#(?P<loc>loc\d+)\)")
 
 
 class TosaConverterForTflite:
@@ -165,6 +172,11 @@ def _add_missing_rescale_rounding_modes(tosa_file: Path) -> None:
     """Add default TOSA rescale rounding modes omitted by older converter output."""
     contents = tosa_file.read_text()
     patched = _RESCALE_ATTRS_RE.sub(_add_missing_rescale_rounding_mode, contents)
+    resize_modes_by_location = _resize_modes_by_location(patched)
+    patched = _RESIZE_ATTRS_RE.sub(
+        lambda match: _add_missing_resize_mode(match, resize_modes_by_location),
+        patched,
+    )
     if patched != contents:
         tosa_file.write_text(patched)
 
@@ -185,3 +197,39 @@ def _add_missing_rescale_rounding_mode(match: re.Match[str]) -> str:
         f"{match['prefix']}{attrs}{separator}"
         f"rounding_mode = DOUBLE_ROUND{match['suffix']}"
     )
+
+
+def _add_missing_resize_mode(
+    match: re.Match[str], resize_modes_by_location: dict[str, str]
+) -> str:
+    attrs = match["attrs"]
+    attrs = attrs.replace('mode = "BILINEAR"', "mode = BILINEAR")
+    attrs = attrs.replace('mode = "NEAREST_NEIGHBOR"', "mode = NEAREST_NEIGHBOR")
+    if "mode" in attrs:
+        return f"{match['prefix']}{attrs}{match['suffix']}"
+
+    mode = _infer_resize_mode(match[0], resize_modes_by_location)
+    if mode is None:
+        return match[0]
+
+    separator = ", " if attrs.strip() else ""
+    return f"{match['prefix']}{attrs}{separator}mode = {mode}{match['suffix']}"
+
+
+def _resize_modes_by_location(contents: str) -> dict[str, str]:
+    modes_by_location = {}
+    for match in _LOCATION_DEF_RE.finditer(contents):
+        name = match["name"]
+        if "ResizeNearestNeighbor" in name:
+            modes_by_location[match["loc"]] = "NEAREST_NEIGHBOR"
+        elif "ResizeBilinear" in name:
+            modes_by_location[match["loc"]] = "BILINEAR"
+    return modes_by_location
+
+
+def _infer_resize_mode(
+    resize_op: str, resize_modes_by_location: dict[str, str]
+) -> str | None:
+    if loc_match := _LOCATION_REF_RE.search(resize_op):
+        return resize_modes_by_location.get(loc_match["loc"])
+    return None

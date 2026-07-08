@@ -337,7 +337,37 @@ def test_tosa_converter_for_tflite_patches_missing_rescale_rounding_mode(
                         "scale32 = true} : "
                         "(tensor<1x8xi32>) -> tensor<1x8xi8>"
                     ),
-                    "%3 = tosa.add %arg0, %arg1 : (tensor<1xi32>, tensor<1xi32>) -> tensor<1xi32>",
+                    (
+                        "%3 = tosa.resize %arg3, %scale, %offset, %border "
+                        "{} : (tensor<1x4x8x16xi8>, !tosa.shape<4>, "
+                        "!tosa.shape<2>, !tosa.shape<2>) -> "
+                        "tensor<1x8x16x16xi8> loc(#loc1)"
+                    ),
+                    (
+                        "%4 = tosa.resize %arg4, %scale, %offset, %border "
+                        "{} : (tensor<1x4x8x16xi8>, !tosa.shape<4>, "
+                        "!tosa.shape<2>, !tosa.shape<2>) -> "
+                        "tensor<1x8x16x16xi32> loc(#loc2)"
+                    ),
+                    (
+                        "%5 = tosa.resize %arg5, %scale, %offset, %border "
+                        '{mode = "NEAREST_NEIGHBOR"} : '
+                        "(tensor<1x4x8x16xi8>, !tosa.shape<4>, "
+                        "!tosa.shape<2>, !tosa.shape<2>) -> "
+                        "tensor<1x8x16x16xi8>"
+                    ),
+                    (
+                        "%6 = tosa.resize %arg6, %scale, %offset, %border "
+                        "{} : (tensor<1x4x8x16xf32>, !tosa.shape<4>, "
+                        "!tosa.shape<2>, !tosa.shape<2>) -> "
+                        "tensor<1x8x16x16xf32>"
+                    ),
+                    (
+                        "%7 = tosa.add %arg0, %arg1 : "
+                        "(tensor<1xi32>, tensor<1xi32>) -> tensor<1xi32>"
+                    ),
+                    '#loc1 = loc("model/resize/ResizeNearestNeighbor"(#loc))',
+                    '#loc2 = loc("model/resize/ResizeBilinear"(#loc))',
                 ]
             )
         )
@@ -361,6 +391,19 @@ def test_tosa_converter_for_tflite_patches_missing_rescale_rounding_mode(
     assert 'rounding_mode = "DOUBLE_ROUND"' not in contents
     assert contents.count("rounding_mode = SINGLE_ROUND") == 1
     assert contents.count("rounding_mode = DOUBLE_ROUND") == 2
+    assert (
+        "tosa.resize %arg3, %scale, %offset, %border {mode = NEAREST_NEIGHBOR}"
+        in contents
+    )
+    assert "tosa.resize %arg4, %scale, %offset, %border {mode = BILINEAR}" in contents
+    assert 'mode = "NEAREST_NEIGHBOR"' not in contents
+    assert contents.count("mode = NEAREST_NEIGHBOR") == 2
+    assert contents.count("mode = BILINEAR") == 1
+    assert (
+        "%6 = tosa.resize %arg6, %scale, %offset, %border {} : "
+        "(tensor<1x4x8x16xf32>, !tosa.shape<4>, !tosa.shape<2>, "
+        "!tosa.shape<2>) -> tensor<1x8x16x16xf32>"
+    ) in contents
 
 
 def test_tosa_converter_for_tflite_does_not_patch_bytecode_output(
