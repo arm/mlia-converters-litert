@@ -171,8 +171,14 @@ def _add_missing_rescale_rounding_modes(tosa_file: Path) -> None:
 
 def _add_missing_rescale_rounding_mode(match: re.Match[str]) -> str:
     attrs = match["attrs"]
+    attrs = attrs.replace(
+        'rounding_mode = "DOUBLE_ROUND"', "rounding_mode = DOUBLE_ROUND"
+    )
+    attrs = attrs.replace(
+        'rounding_mode = "SINGLE_ROUND"', "rounding_mode = SINGLE_ROUND"
+    )
     if "rounding_mode" in attrs:
-        return match[0]
+        return f"{match['prefix']}{attrs}{match['suffix']}"
 
     separator = ", " if attrs.strip() else ""
     return (

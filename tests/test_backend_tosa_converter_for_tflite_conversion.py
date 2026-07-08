@@ -326,11 +326,18 @@ def test_tosa_converter_for_tflite_patches_missing_rescale_rounding_mode(
                     (
                         "%1 = tosa.rescale %arg1 "
                         "{input_unsigned = false, output_unsigned = false, "
+                        'per_channel = false, rounding_mode = "DOUBLE_ROUND", '
+                        "scale32 = true} : "
+                        "(tensor<1x8xi32>) -> tensor<1x8xi8>"
+                    ),
+                    (
+                        "%2 = tosa.rescale %arg2 "
+                        "{input_unsigned = false, output_unsigned = false, "
                         "per_channel = false, rounding_mode = SINGLE_ROUND, "
                         "scale32 = true} : "
                         "(tensor<1x8xi32>) -> tensor<1x8xi8>"
                     ),
-                    "%2 = tosa.add %arg0, %arg1 : (tensor<1xi32>, tensor<1xi32>) -> tensor<1xi32>",
+                    "%3 = tosa.add %arg0, %arg1 : (tensor<1xi32>, tensor<1xi32>) -> tensor<1xi32>",
                 ]
             )
         )
@@ -351,8 +358,9 @@ def test_tosa_converter_for_tflite_patches_missing_rescale_rounding_mode(
         "{input_unsigned = false, output_unsigned = false, "
         "per_channel = false, scale32 = true, rounding_mode = DOUBLE_ROUND}"
     ) in contents
+    assert 'rounding_mode = "DOUBLE_ROUND"' not in contents
     assert contents.count("rounding_mode = SINGLE_ROUND") == 1
-    assert contents.count("rounding_mode = DOUBLE_ROUND") == 1
+    assert contents.count("rounding_mode = DOUBLE_ROUND") == 2
 
 
 def test_tosa_converter_for_tflite_does_not_patch_bytecode_output(
