@@ -18,7 +18,6 @@ env:
   UV_DEFAULT_INDEX: ${{ secrets.INTERNAL_PYPI_HOST && format('internal={0}', secrets.INTERNAL_PYPI_HOST) || '' }}
   UV_INDEX_INTERNAL_USERNAME: ${{ secrets.INTERNAL_PYPI_HOST && secrets.INTERNAL_PYPI_USERNAME || '' }}
   UV_INDEX_INTERNAL_PASSWORD: ${{ secrets.INTERNAL_PYPI_HOST && secrets.INTERNAL_PYPI_PASSWORD || '' }}
-  VENDORED_ARTIFACTS_URLS: ${{ secrets.VENDORED_ARTIFACTS_URLS }}
 
 jobs:
   build_and_test_wheel:

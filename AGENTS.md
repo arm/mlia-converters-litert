@@ -23,8 +23,7 @@ and `openspec/`.
 - Keep generated or tool-owned OpenSpec files compatible with the local SPDX
   header or `.license` sidecar pattern.
 - If packaging, CI, or dependencies change, review `pyproject.toml`,
-  `.pre-commit-config.yaml`, `hatch_build.py`, and `.github/workflows/`
-  together.
+  `.pre-commit-config.yaml`, and `.github/workflows/` together.
 
 ## Setup And Validation
 
@@ -40,8 +39,7 @@ uv build --wheel
 
 - `src/mlia/backend/tosa_converter_for_tflite/`: converter implementation,
   plugin registration, installation metadata, and conversion helpers.
-- `src/mlia/_vendor/artifacts/tosa-converter-for-tflite/`: vendored artifact
-  metadata and sidecars.
+- `pyproject.toml`: public `tosa-converter-for-tflite` dependency metadata.
 - `tests/`: converter registration, conversion behavior, and repository hook
   coverage.
 - `pre_commit_hooks/check_copyright_header.py`: local copyright-year hook.

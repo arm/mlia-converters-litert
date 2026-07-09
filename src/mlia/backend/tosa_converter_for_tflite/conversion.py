@@ -7,7 +7,7 @@ from __future__ import annotations
 import logging
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from mlia.backend.tosa_converter_for_tflite.install import (
     ensure_tosa_converter_for_tflite_installed,
@@ -21,6 +21,8 @@ from mlia.utils.proc import (
 )
 
 logger = logging.getLogger(__name__)
+
+OutputFormat = Literal["mlir-bytecode", "mlir-text"]
 
 _RESCALE_ATTRS_RE = re.compile(
     r"(?P<prefix>\btosa\.rescale\b[^\n{]*\{)"
@@ -53,7 +55,7 @@ class TosaConverterForTflite:
         if not set(kwargs).issubset(self.SUPPORTED_KWARGS):
             return False
 
-        output_format = kwargs.get("output_format", "mlir-text")
+        output_format = kwargs.get("output_format", "mlir-bytecode")
         if output_format not in self.SUPPORTED_OUTPUT_FORMATS:
             return False
 
@@ -65,15 +67,14 @@ class TosaConverterForTflite:
         tflite_file: Path,
         output_dir: Path,
         *,
-        output_format: str = "mlir-text",
-        emit_debug_info: bool | None = None,
+        output_format: OutputFormat = "mlir-bytecode",
+        emit_debug_info: bool = False,
     ) -> Path:
         """
         Run the TOSA Converter For Tflite with the given TensorFlow Lite file.
 
         Returns the path of the TOSA MLIR output file created in the output dir.
         """
-        del emit_debug_info
         if not output_dir.is_dir():
             raise NotADirectoryError(
                 f"Path '{output_dir}' is not a directory. Unable to run "
@@ -90,7 +91,11 @@ class TosaConverterForTflite:
             converter_cmd = ensure_tosa_converter_for_tflite_installed()
 
             tosa_file = self._run_converter(
-                tflite_file, output_dir, converter_cmd, output_format
+                tflite_file,
+                output_dir,
+                converter_cmd,
+                output_format=output_format,
+                emit_debug_info=emit_debug_info,
             )
 
             logger.debug("Output file: %s", tosa_file)
@@ -117,7 +122,9 @@ class TosaConverterForTflite:
         tflite_file: Path,
         tosa_file: Path,
         converter_cmd: tuple[str, ...],
-        output_format: str,
+        *,
+        output_format: OutputFormat = "mlir-bytecode",
+        emit_debug_info: bool = False,
     ) -> Command:
         """Create the command to run the TOSA Converter For Tflite."""
         cmd = Command(
@@ -126,7 +133,7 @@ class TosaConverterForTflite:
                 str(tflite_file),
                 "-o",
                 str(tosa_file),
-                *self._extra_arguments(output_format),
+                *self._extra_arguments(output_format, emit_debug_info),
             ],
         )
         return cmd
@@ -136,16 +143,19 @@ class TosaConverterForTflite:
         tflite_file: Path,
         output_dir: Path,
         converter_cmd: tuple[str, ...],
-        output_format: str,
+        *,
+        output_format: OutputFormat = "mlir-bytecode",
+        emit_debug_info: bool = False,
     ) -> Path:
         """Run the TOSA Converter For Tflite and return the TOSA MLIR output file."""
-        if output_format not in self.SUPPORTED_OUTPUT_FORMATS:
-            raise ValueError(f"Unsupported output format: {output_format}")
-
         suffix = ".tosamlir" if output_format == "mlir-text" else ".tosa.mlirbc"
         tosa_file = output_dir / f"{tflite_file.stem}{suffix}"
         cmd = self._create_converter_command(
-            tflite_file, tosa_file, converter_cmd, output_format
+            tflite_file,
+            tosa_file,
+            converter_cmd,
+            output_format=output_format,
+            emit_debug_info=emit_debug_info,
         )
         process_command_output(cmd, self.output_consumers)
 
@@ -163,9 +173,19 @@ class TosaConverterForTflite:
 
         return tosa_file
 
-    def _extra_arguments(self, output_format: str = "mlir-text") -> list[str]:
+    def _extra_arguments(
+        self, output_format: OutputFormat, emit_debug_info: bool = False
+    ) -> list[str]:
         """Return any extra arguments to be used with the TOSA Converter For Tflite."""
-        return ["--text"] if output_format == "mlir-text" else []
+        if output_format == "mlir-bytecode":
+            args = ["--bytecode"]
+        elif output_format == "mlir-text":
+            args = ["--text"]
+        else:
+            raise ValueError(f"Unsupported TOSA output format: {output_format}")
+        if emit_debug_info:
+            args.append("--emit-debug-info")
+        return args
 
 
 def _add_missing_rescale_rounding_modes(tosa_file: Path) -> None:

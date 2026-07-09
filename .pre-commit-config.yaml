@@ -29,7 +29,6 @@ repos:
 
     - id: check-added-large-files
       args: ['--maxkb=300', "--enforce-all"]
-      exclude: src/mlia/_vendor/artifacts/tosa-converter-for-tflite/.*\.whl
 
 - repo: https://github.com/asottile/pyupgrade
   rev: v3.10.1

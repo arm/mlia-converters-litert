@@ -11,23 +11,25 @@ import importlib
 import sys
 
 from mlia.backend.install import (
-    InstallFromVendorPackage,
+    DownloadAndInstall,
     Installation,
     PyPackageBackendInstallation,
 )
 
 logger = logging.getLogger(__name__)
 
+TOSA_CONVERTER_PACKAGE = "tosa-converter-for-tflite==2026.2.0"
+TOSA_CONVERTER_DISTRIBUTION = "tosa-converter-for-tflite"
+
 
 def get_tosa_converter_for_tflite_backend_installation() -> Installation:
-    """Get TOSA converter for tflite backend whl."""
+    """Get TOSA converter for tflite backend package."""
     return PyPackageBackendInstallation(
         name="tosa-converter-for-tflite",
         description="Tool to convert a tflite file to TOSA",
-        packages_to_install=[],
-        packages_to_uninstall=["tosa-converter-for-tflite"],
-        expected_packages=["tosa-converter-for-tflite"],
-        vendor_path="tosa-converter-for-tflite",
+        packages_to_install=[TOSA_CONVERTER_PACKAGE],
+        packages_to_uninstall=[TOSA_CONVERTER_DISTRIBUTION],
+        expected_packages=[TOSA_CONVERTER_DISTRIBUTION],
     )
 
 
@@ -63,17 +65,17 @@ def ensure_tosa_converter_for_tflite_installed() -> tuple[str, ...]:
         return (sys.executable, "-m", module_name)
 
     installation = get_tosa_converter_for_tflite_backend_installation()
-    install_type = InstallFromVendorPackage()
+    install_type = DownloadAndInstall()
 
     if not installation.supports(install_type):
         raise RuntimeError(
-            "Auto-install failed: vendored 'tosa-converter-for-tflite' wheel "
-            "is missing from mlia-converters-tflite."
+            "Auto-install failed: 'tosa-converter-for-tflite' package "
+            "installation is not available."
         )
 
     logger.info(
-        "Installing 'tosa-converter-for-tflite' from vendored package in "
-        "mlia-converters-tflite."
+        "Installing 'tosa-converter-for-tflite' from the configured Python "
+        "package index."
     )
     installation.install(install_type)
 
