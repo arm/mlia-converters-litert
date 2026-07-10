@@ -15,13 +15,19 @@ At a high level, the converter:
 
 - Reads the TFLite model representation.
 - Maps supported operations into the TOSA-oriented path used by MLIA.
-- Prepares artifacts suitable for downstream MLIA backends.
+- Prepares `.tosamlir` text or `.tosa.mlirbc` bytecode artifacts suitable for
+  downstream MLIA backends.
 
 ## Operational model
 
 In most workflows this converter is a dependency backend. You usually see the
 results of the later analysis backend rather than interacting with this package
 as a destination in its own right.
+
+## Output format
+
+The default route writes text MLIR with a `.tosamlir` suffix. Workflows that
+request bytecode output receive a `.tosa.mlirbc` artifact instead.
 
 ## Maintenance considerations
 

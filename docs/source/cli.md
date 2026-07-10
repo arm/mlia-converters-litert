@@ -8,11 +8,12 @@ SPDX-License-Identifier: Apache-2.0
 This repo does not introduce a separate top-level command. The converter is used
 through MLIA runs that start from a `.tflite` model.
 
-## Backend naming
+## Transformer naming
 
 When you need to refer to this converter explicitly:
 
-- Use `tflite_to_tosa` as the backend key in MLIA commands.
+- Use `tflite_to_tosa` as the transformer name in MLIA configuration or
+  diagnostics.
 - Treat `tosa_converter_for_tflite` as the implementation package name, not the
   CLI name.
 
@@ -25,16 +26,16 @@ downstream backend require it:
 mlia check model.tflite --target-profile <target-profile> --performance
 ```
 
-## Make the pipeline explicit for debugging
+## Debug the conversion path
 
-If you want to make the conversion step visible in the command line, pin the
-converter backend alongside the downstream backend:
+If you want to make the downstream analysis path explicit, pin the target
+backend and let MLIA choose the TFLite transformer when it needs a TOSA
+artifact:
 
 ```bash
 mlia check model.tflite \
   --target-profile <target-profile> \
   --performance \
-  --backend tflite_to_tosa \
   --backend <downstream-backend>
 ```
 
@@ -43,6 +44,6 @@ mlia check model.tflite \
 When a TensorFlow Lite-driven run fails, a useful sequence is:
 
 1. Confirm the downstream target and backend plugins are installed.
-2. Rerun with explicit backends to make the conversion path visible.
-3. Inspect the wider MLIA error and backend selection.
+2. Rerun with an explicit downstream backend to reduce ambiguity.
+3. Inspect the wider MLIA error, transformer selection, and backend selection.
 4. Use the troubleshooting page for conversion-stage failures.

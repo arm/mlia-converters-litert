@@ -17,6 +17,8 @@ diagnostics, not final target metrics.
 In a successful workflow, this converter contributes:
 
 - A TOSA-oriented intermediate representation derived from a `.tflite` input.
+- Either a `.tosamlir` text artifact or `.tosa.mlirbc` bytecode artifact,
+  depending on the requested output format.
 - Conversion-stage logs or diagnostics during the MLIA run.
 - Artifacts that a downstream backend can consume for further analysis.
 

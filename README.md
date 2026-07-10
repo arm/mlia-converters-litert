@@ -10,7 +10,7 @@ models into TOSA so they can be consumed by MLIA backends and target flows that
 operate on TOSA artifacts.
 
 The package is distributed as `mlia-converters-tflite`. When installed, it
-registers the backend key `tflite_to_tosa` with MLIA through the plugin
+registers the transformer name `tflite_to_tosa` with MLIA through the plugin
 entry-point system.
 
 ## Table of Contents
@@ -35,7 +35,7 @@ The implementation package lives under
 `src/mlia/backend/tosa_converter_for_tflite/` and includes:
 
 - Conversion logic.
-- Converter registration.
+- Transformer registration.
 - Backend installation metadata used by MLIA.
 
 ## Repository contents
@@ -66,18 +66,20 @@ with `mlia` as the primary runtime dependency.
 
 ## How MLIA uses this plugin
 
-MLIA discovers this repository through the `mlia.plugin.converter` entry point.
-When installed, the plugin registers the backend key `tflite_to_tosa`.
+MLIA discovers this repository through the `mlia.plugin.transformer` entry
+point. When installed, the plugin registers the transformer name
+`tflite_to_tosa`.
 
 This is the important naming split:
 
-- `tflite_to_tosa` is the backend key used in MLIA configuration and CLI flows
-- `tosa_converter_for_tflite` is the implementation package name used in the codebase
+- `tflite_to_tosa` is the transformer name used in MLIA configuration and API
+  or CLI flows
+- `tosa_converter_for_tflite` is the implementation package name used in the codebase.
 
 That means downstream MLIA components can:
 
 - Discover the converter without hard-coded import paths.
-- Request a TFLite-to-TOSA conversion through the converter registry.
+- Request a TFLite-to-TOSA conversion through the transformer registry.
 - Treat the converter as a separately versioned plugin package.
 
 For more implementation detail, see [docs/README.md](docs/README.md).

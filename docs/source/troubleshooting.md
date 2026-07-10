@@ -7,11 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 
 ## General issues
 
-### Converter plugin not available
+### Transformer plugin not available
 
 - Confirm the package is installed in the active environment.
 - Check MLIA's plugin discovery flow in the wider environment.
-- Reinstall the package if the converter key is not being discovered.
+- Reinstall the package if the `tflite_to_tosa` transformer name is not being
+  discovered.
 
 ### Wrong input type
 
