@@ -15,14 +15,14 @@ MLIA.
 
 ## Setting up the MLIA plugin repo
 
-First clone the MLIA TFLite converters repository.
+First clone the MLIA LiteRT converters repository.
 
 ```bash
     # Using SSH
-    git clone "ssh://git@github.com:arm/mlia-converters-tflite.git"
+    git clone "ssh://git@github.com:arm/mlia-converters-litert.git"
     # Or HTTPS
-    git clone "https://github.com/arm/mlia-converters-tflite.git"
-    cd mlia-converters-tflite
+    git clone "https://github.com/arm/mlia-converters-litert.git"
+    cd mlia-converters-litert
     git checkout main
     # git pull is not required upon initial clone but good practice before
     # creating a patch
@@ -91,7 +91,7 @@ can go to the main branch of MLIA.
 ### Reporting bugs
 
 Report bugs by creating GitHub issues. Use the
-[`arm/mlia-converters-tflite` issue tracker](https://github.com/arm/mlia-converters-tflite/issues)
+[`arm/mlia-converters-litert` issue tracker](https://github.com/arm/mlia-converters-litert/issues)
 by default.
 
 If the bug is in shared MLIA core functionality rather than this plugin, use
@@ -126,12 +126,12 @@ as part of your contribution.
 
 ## Releases
 
-Official releases are published through [PyPI](https://pypi.org/project/mlia-converters-tflite/).
+Official releases are published through [PyPI](https://pypi.org/project/mlia-converters-litert/).
 
 ## Development Repository
 
 The development repository is hosted on
-[github.com](https://github.com/arm/mlia-converters-tflite.git/).
+[github.com](https://github.com/arm/mlia-converters-litert.git/).
 
 ## Continuous Integration
 

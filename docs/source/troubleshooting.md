@@ -16,15 +16,15 @@ SPDX-License-Identifier: Apache-2.0
 
 ### Wrong input type
 
-- This repo is intended for `.tflite` models.
-- If the input file is not a valid TFLite artifact, the conversion path can fail
+- This repo is intended for LiteRT / TensorFlow Lite `.tflite` models.
+- If the input file is not a valid `.tflite` artifact, the conversion path can fail
   before downstream analysis begins.
 
 ## Conversion-specific issues
 
 ### Conversion fails on model contents
 
-- Reduce the issue to a smaller known-good TFLite model if possible.
+- Reduce the issue to a smaller known-good `.tflite` model if possible.
 - Check whether the model contains unsupported or awkward operator patterns for
   the conversion path.
 - Treat the failure as a conversion issue first, not a target-performance issue.

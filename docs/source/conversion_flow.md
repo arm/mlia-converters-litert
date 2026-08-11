@@ -7,13 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Supported input
 
-This repo is focused on TensorFlow Lite models in `.tflite` form.
+This repo is focused on LiteRT / TensorFlow Lite `.tflite` models.
 
 ## What the converter does
 
 At a high level, the converter:
 
-- Reads the TFLite model representation.
+- Reads the LiteRT / TensorFlow Lite `.tflite` model representation.
 - Maps supported operations into the TOSA-oriented path used by MLIA.
 - Prepares `.tosamlir` text or `.tosa.mlirbc` bytecode artifacts suitable for
   downstream MLIA backends.

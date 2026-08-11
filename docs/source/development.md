@@ -7,10 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 
 ## What counts as development in this repo
 
-This repository owns a TensorFlow Lite converter stage inside the wider MLIA
-pipeline. Most changes here affect conversion behaviour, plugin registration,
-and the expectations of the downstream backends that consume converted
-artifacts.
+This repository owns a LiteRT / TensorFlow Lite `.tflite` converter stage inside
+the wider MLIA pipeline. Most changes here affect conversion behaviour, plugin
+registration, and the expectations of the downstream backends that consume
+converted artifacts.
 
 ## Local setup
 

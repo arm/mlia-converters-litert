@@ -3,13 +3,13 @@ SPDX-FileCopyrightText: Copyright 2026, Arm Limited and/or its affiliates.
 SPDX-License-Identifier: Apache-2.0
 --->
 
-# MLIA TFLite Converter Plugin
+# MLIA LiteRT Converter Plugin
 
-This repository contains the MLIA converter plugin that translates TFLite
-models into TOSA so they can be consumed by MLIA backends and target flows that
-operate on TOSA artifacts.
+This repository contains the MLIA converter plugin that translates LiteRT /
+TensorFlow Lite `.tflite` models into TOSA so they can be consumed by MLIA
+backends and target flows that operate on TOSA artifacts.
 
-The package is distributed as `mlia-converters-tflite`. When installed, it
+The package is distributed as `mlia-converters-litert`. When installed, it
 registers the transformer name `tflite_to_tosa` with MLIA through the plugin
 entry-point system.
 
@@ -26,10 +26,13 @@ entry-point system.
 
 ## Overview
 
-This plugin provides the conversion bridge between TFLite model files and
-TOSA-based MLIA backends. It gives the wider MLIA ecosystem a dedicated package
-for TFLite-to-TOSA conversion and keeps converter logic separate from the core
-MLIA framework.
+This plugin provides the conversion bridge between LiteRT / TensorFlow Lite
+`.tflite` model files and TOSA-based MLIA backends. It gives the wider MLIA
+ecosystem a dedicated package for `.tflite`-to-TOSA conversion and keeps
+converter logic separate from the core MLIA framework.
+
+LiteRT migration does not change MLIA’s `.tflite` input handling; this plugin
+continues to convert `.tflite` models to TOSA.
 
 The implementation package lives under
 `src/mlia/backend/tosa_converter_for_tflite/` and includes:
@@ -52,7 +55,7 @@ The implementation package lives under
 Install the package into an environment that already contains `mlia`:
 
 ```bash
-pip install mlia-converters-tflite
+pip install mlia-converters-litert
 ```
 
 For source-based development with `uv`:
@@ -79,7 +82,8 @@ This is the important naming split:
 That means downstream MLIA components can:
 
 - Discover the converter without hard-coded import paths.
-- Request a TFLite-to-TOSA conversion through the transformer registry.
+- Request a LiteRT / TensorFlow Lite `.tflite`-to-TOSA conversion through the
+  transformer registry.
 - Treat the converter as a separately versioned plugin package.
 
 For more implementation detail, see [docs/README.md](docs/README.md).
@@ -90,7 +94,7 @@ Report bugs by creating GitHub issues. Use the
 [`arm/mlia` issue tracker](https://github.com/arm/mlia/issues) by default.
 
 Only open an issue in
-[`arm/mlia-converters-tflite`](https://github.com/arm/mlia-converters-tflite/issues)
+[`arm/mlia-converters-litert`](https://github.com/arm/mlia-converters-litert/issues)
 when the bug is clearly and specifically in this TFLite converter plugin.
 
 ## Development (uv)

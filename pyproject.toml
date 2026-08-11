@@ -9,9 +9,9 @@ requires = [
 build-backend = "hatchling.build"
 
 [project]
-name = "mlia-converters-tflite"
+name = "mlia-converters-litert"
 dynamic = ["version"]
-description = "ML Inference Advisor TFLite Converter Plugin"
+description = "ML Inference Advisor LiteRT Converter Plugin"
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
 license = "Apache-2.0"
@@ -19,7 +19,7 @@ license-files = ["LICENSES/*.txt"]
 authors = [
     {name = "Arm Ltd", email = "mlia@arm.com"}
 ]
-keywords = ["ml", "arm", "tflite", "tosa"]
+keywords = ["ml", "arm", "litert", "tflite", "tosa"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -33,7 +33,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/arm/mlia-tflite-converters.git"
+Homepage = "https://github.com/arm/mlia-converters-litert.git"
 
 [project.entry-points."mlia.plugin.transformer"]
 tflite_to_tosa = "mlia.backend.tosa_converter_for_tflite.converter_plugin:TFLiteToTosaConverterPlugin"

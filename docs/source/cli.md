@@ -29,7 +29,7 @@ mlia check model.tflite --target-profile <target-profile> --performance
 ## Debug the conversion path
 
 If you want to make the downstream analysis path explicit, pin the target
-backend and let MLIA choose the TFLite transformer when it needs a TOSA
+backend and let MLIA choose the `.tflite` transformer when it needs a TOSA
 artifact:
 
 ```bash
@@ -41,7 +41,7 @@ mlia check model.tflite \
 
 ## Practical debugging sequence
 
-When a TensorFlow Lite-driven run fails, a useful sequence is:
+When a LiteRT / TensorFlow Lite `.tflite`-driven run fails, a useful sequence is:
 
 1. Confirm the downstream target and backend plugins are installed.
 2. Rerun with an explicit downstream backend to reduce ambiguity.

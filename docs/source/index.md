@@ -3,15 +3,16 @@ SPDX-FileCopyrightText: Copyright 2026, Arm Limited and/or its affiliates.
 SPDX-License-Identifier: Apache-2.0
 --->
 
-# MLIA TFLite Converter
+# MLIA LiteRT Converter
 
 ## Purpose
 
-`mlia-converters-tflite` packages the TFLite converters used by MLIA.
+This repository packages the LiteRT / TensorFlow Lite `.tflite` converter used
+by MLIA.
 
 ## Included plugins
 
-- `tflite_to_tosa`: TFLite-to-TOSA converter backend
+- `tflite_to_tosa`: LiteRT / TensorFlow Lite `.tflite`-to-TOSA converter backend
 
 ## Documentation Map
 

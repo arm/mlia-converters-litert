@@ -56,6 +56,6 @@ jobs:
       - name: Upload docs artifact
         uses: actions/upload-artifact@v6
         with:
-          name: docs-site-mlia-converters-tflite
+          name: docs-site-mlia-converters-litert
           path: .mkdocs/site/
           if-no-files-found: error

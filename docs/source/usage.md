@@ -24,7 +24,8 @@ This repo uses two names that matter in different places:
 
 The repository is designed to be installed alongside `mlia`, not used as a
 standalone CLI tool. Once installed, MLIA can discover the converter and route
-TFLite conversion requests through the transformer registry.
+LiteRT / TensorFlow Lite `.tflite` conversion requests through the transformer
+registry.
 
 ## Typical workflow
 
