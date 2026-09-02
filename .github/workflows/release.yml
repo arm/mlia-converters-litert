@@ -116,3 +116,11 @@ jobs:
       publish: true
       wheel-artifact: wheel
     secrets: inherit
+
+  sync_to_public_repo:
+    needs: build_and_test_wheel
+    if: ${{ github.event.repository.private }}
+    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/sync-to-public-repo.yml@b69441d7e9425883a91619464e8207123ec81d25
+    with:
+      public_repo: arm/mlia-converters-litert
+    secrets: inherit
