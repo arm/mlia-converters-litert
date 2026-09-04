@@ -22,6 +22,7 @@ entry-point system.
 - [Reporting bugs](#reporting-bugs)
 - [Development (uv)](#development-uv)
 - [Documentation](#documentation)
+- [License](#license)
 - [Trademarks and copyrights](#trademarks-and-copyrights)
 
 ## Overview
@@ -139,6 +140,11 @@ repo lacks equivalent tooling (for example, pre-commit configuration).
 ## Documentation
 
 Additional repository documentation lives in [docs/README.md](docs/README.md).
+
+## License
+
+This project is licensed under the Apache License 2.0. See
+[`LICENSES/Apache-2.0.txt`](LICENSES/Apache-2.0.txt) for the full license text.
 
 ## Trademarks and copyrights
 
