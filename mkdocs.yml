@@ -3,6 +3,7 @@
 
 site_name: MLIA TFLite Converter
 site_description: Documentation for the MLIA TFLite converter plugin.
+site_url: https://arm.github.io/mlia-converters-litert/
 repo_url: https://github.com/arm/mlia-converters-litert
 repo_name: arm/mlia-converters-litert
 edit_uri: edit/main/docs/source/
