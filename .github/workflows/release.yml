@@ -166,7 +166,7 @@ jobs:
     name: Prepare Release Notes
     if: ${{ github.event.repository.private && github.event_name == 'push' && github.ref_type == 'tag' }}
     needs: publish_docs
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.UBUNTU_RUNNER }}
     permissions:
       contents: write
     steps:
@@ -216,16 +216,10 @@ jobs:
       needs.blackduck_scan.result == 'success' &&
       github.event.repository.private && github.event_name == 'push' &&
       github.ref == 'refs/heads/main' }}
-    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/sync-to-public-repo.yml@3b8e8ce54496085ab7858b5acbdd404bdb31d895
+    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/sync-to-public-repo.yml@3ec9aeb477e260cfe18ab3ee9c0488ff508bd14e
     with:
       public_repo: arm/mlia-converters-litert
-      vault-namespace: iac-expkits/prod
-      vault-secrets: |
-        kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} ARM_ORG_TOKEN | ARM_ORG_TOKEN
-    secrets:
-      VAULT_URL: ${{ secrets.VAULT_URL }}
-      VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
-      VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+    secrets: inherit
 
   sync_release_to_public_repo:
     needs: [create_github_release, blackduck_scan]
@@ -234,13 +228,7 @@ jobs:
       needs.blackduck_scan.result == 'success' &&
       github.event.repository.private && github.event_name == 'push' &&
       github.ref_type == 'tag' }}
-    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/sync-to-public-repo.yml@3b8e8ce54496085ab7858b5acbdd404bdb31d895
+    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/sync-to-public-repo.yml@3ec9aeb477e260cfe18ab3ee9c0488ff508bd14e
     with:
       public_repo: arm/mlia-converters-litert
-      vault-namespace: iac-expkits/prod
-      vault-secrets: |
-        kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} ARM_ORG_TOKEN | ARM_ORG_TOKEN
-    secrets:
-      VAULT_URL: ${{ secrets.VAULT_URL }}
-      VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
-      VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+    secrets: inherit

@@ -12,8 +12,9 @@ jobs:
     if: >-
       ${{ github.event.action != 'edited' ||
       github.event.changes.base != null }}
-    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/codex-pr-review.yaml@main
+    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/codex-pr-review.yaml@3ec9aeb477e260cfe18ab3ee9c0488ff508bd14e
     with:
+      runner: ${{ vars.UBUNTU_RUNNER }}
       vault_secret_path: kv/data/MLIA/CI
       vault_secret_version: ${{ vars.VAULT_CI_SECRET_VERSION || '0' }}
     secrets: inherit
