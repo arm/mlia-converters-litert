@@ -31,8 +31,35 @@ env:
     kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} VENDORED_ARTIFACTS_URLS | VENDORED_ARTIFACTS_URLS
 
 jobs:
+  lint:
+    if: ${{ github.event.repository.private }}
+    uses: ./.github/workflows/lint.yml
+    secrets: inherit
+
+  blackduck_scan:
+    name: Black Duck Scan
+    if: ${{ github.event.repository.private }}
+    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/blackduck-full-scan.yml@3ec9aeb477e260cfe18ab3ee9c0488ff508bd14e
+    with:
+      project-name: ${{ vars.BLACKDUCK_PROJECT_NAME || github.event.repository.name }}
+      project-version: ${{ github.ref_name }}
+      source-ref: ${{ github.sha }}
+      uv-dependencies: true
+      python-version: "3.10"
+      vault-namespace: iac-expkits/prod
+      vault-secrets: |
+        kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} BLACKDUCK_API_TOKEN | BLACKDUCK_API_TOKEN ;
+        kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} UV_DEFAULT_INDEX | UV_DEFAULT_INDEX ;
+        kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} INTERNAL_PYPI_USERNAME | UV_INDEX_INTERNAL_USERNAME ;
+        kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} INTERNAL_PYPI_PASSWORD | UV_INDEX_INTERNAL_PASSWORD
+    secrets:
+      VAULT_URL: ${{ secrets.VAULT_URL }}
+      VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+      VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+
   build_and_test_wheel:
     name: Build And Test Wheel
+    if: ${{ github.event.repository.private }}
     runs-on: ["${{ vars.UBUNTU_RUNNER }}", "X64"]
     steps:
       - name: Import secrets from Vault
@@ -54,13 +81,14 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - run: uv build --wheel
+      - run: uv build
       - run: uv sync --no-sources --no-install-project --group test
+      - run: uv pip install --python "$UV_PROJECT_ENVIRONMENT" --no-deps dist/*.whl
+      - run: uv pip check --python "$UV_PROJECT_ENVIRONMENT"
       - run: |
           set -o pipefail
           uv run --no-sync \
-            --with dist/*.whl \
-            -- pytest --no-success-flaky-report tests/ | tee coverage.txt
+            pytest --no-success-flaky-report -o pythonpath= tests/ | tee coverage.txt
       - name: Publish coverage summary
         run: |
           {
@@ -76,40 +104,57 @@ jobs:
           name: coverage-report
           path: coverage.xml
           if-no-files-found: ignore
-      - name: Upload wheel artifacts
+      - name: Upload tested distributions
         uses: actions/upload-artifact@v4
         with:
           name: wheel
-          path: dist/*.whl
+          path: dist/*
           if-no-files-found: error
 
+  # Internal publication is independent of Black Duck; public sync requires it.
   publish_release:
     name: Publish Release
-    needs: build_and_test_wheel
+    needs:
+      - lint
+      - build_and_test_wheel
     if: >-
       ${{
-        always() &&
+        !cancelled() &&
+        needs.lint.result == 'success' &&
         needs.build_and_test_wheel.result == 'success' &&
-        (github.repository_owner != 'arm' || github.ref_type == 'tag')
+        github.event.repository.private && github.event_name == 'push' &&
+        (github.ref == 'refs/heads/main' || github.ref_type == 'tag')
       }}
     runs-on: ["${{ vars.UBUNTU_RUNNER }}", "X64"]
     steps:
+      - name: Import secrets from Vault
+        uses: hashicorp/vault-action@v4
+        with:
+          url: ${{ secrets.VAULT_URL }}
+          method: approle
+          roleId: ${{ secrets.VAULT_ROLE_ID }}
+          secretId: ${{ secrets.VAULT_SECRET_ID }}
+          namespace: iac-expkits/prod
+          secrets: |
+            kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} PUBLISH_PYPI_HOST | UV_PUBLISH_URL ;
+            kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} PUBLISH_PYPI_USERNAME | UV_PUBLISH_USERNAME ;
+            kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} PUBLISH_PYPI_PASSWORD | UV_PUBLISH_PASSWORD
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - run: uv build
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: dist
       - run: uv publish dist/*
-        env:
-          UV_PUBLISH_URL: ${{ secrets.PUBLISH_PYPI_HOST }}
-          UV_PUBLISH_USERNAME: ${{ secrets.INTERNAL_PYPI_USERNAME || secrets.PUBLISH_PYPI_USERNAME }}
-          UV_PUBLISH_PASSWORD: ${{ secrets.INTERNAL_PYPI_PASSWORD || secrets.PUBLISH_PYPI_PASSWORD }}
 
   publish_docs:
     name: Publish Documentation
-    if: ${{ github.ref_type == 'tag' }}
+    if: ${{ github.event.repository.private && github.event_name == 'push' && github.ref_type == 'tag' }}
     needs: publish_release
     uses: ./.github/workflows/docs.yml
     with:
@@ -117,10 +162,85 @@ jobs:
       wheel-artifact: wheel
     secrets: inherit
 
+  create_github_release:
+    name: Prepare Release Notes
+    if: ${{ github.event.repository.private && github.event_name == 'push' && github.ref_type == 'tag' }}
+    needs: publish_docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create release or preserve existing notes
+        uses: actions/github-script@v7
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        with:
+          script: |
+            const repo = context.repo;
+            const tag = process.env.RELEASE_TAG;
+            let release;
+            try {
+              ({ data: release } = await github.rest.repos.getReleaseByTag({
+                ...repo, tag
+              }));
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              await github.rest.repos.createRelease({
+                ...repo,
+                tag_name: tag,
+                target_commitish: context.sha,
+                name: tag,
+                generate_release_notes: true,
+                prerelease: !/^v[0-9]+\.[0-9]+\.[0-9]+$/.test(tag)
+              });
+              return;
+            }
+            const updates = {};
+            if (!release.body?.trim()) {
+              const { data: notes } = await github.rest.repos.generateReleaseNotes({
+                ...repo, tag_name: tag, target_commitish: context.sha
+              });
+              updates.body = notes.body;
+            }
+            if (release.draft) updates.draft = false;
+            if (Object.keys(updates).length) {
+              await github.rest.repos.updateRelease({
+                ...repo, release_id: release.id, ...updates
+              });
+            }
+
   sync_to_public_repo:
-    needs: build_and_test_wheel
-    if: ${{ github.event.repository.private }}
-    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/sync-to-public-repo.yml@d700621dafc25dea2b4c5d8531171af5ec8e00ee
+    needs: [publish_release, blackduck_scan]
+    if: >-
+      ${{ !cancelled() && needs.publish_release.result == 'success' &&
+      needs.blackduck_scan.result == 'success' &&
+      github.event.repository.private && github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' }}
+    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/sync-to-public-repo.yml@3b8e8ce54496085ab7858b5acbdd404bdb31d895
     with:
       public_repo: arm/mlia-converters-litert
-    secrets: inherit
+      vault-namespace: iac-expkits/prod
+      vault-secrets: |
+        kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} ARM_ORG_TOKEN | ARM_ORG_TOKEN
+    secrets:
+      VAULT_URL: ${{ secrets.VAULT_URL }}
+      VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+      VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}
+
+  sync_release_to_public_repo:
+    needs: [create_github_release, blackduck_scan]
+    if: >-
+      ${{ !cancelled() && needs.create_github_release.result == 'success' &&
+      needs.blackduck_scan.result == 'success' &&
+      github.event.repository.private && github.event_name == 'push' &&
+      github.ref_type == 'tag' }}
+    uses: Arm-Debug/github-workflow-wizardry/.github/workflows/sync-to-public-repo.yml@3b8e8ce54496085ab7858b5acbdd404bdb31d895
+    with:
+      public_repo: arm/mlia-converters-litert
+      vault-namespace: iac-expkits/prod
+      vault-secrets: |
+        kv/data/MLIA/CI?version=${{ vars.VAULT_CI_SECRET_VERSION || '0' }} ARM_ORG_TOKEN | ARM_ORG_TOKEN
+    secrets:
+      VAULT_URL: ${{ secrets.VAULT_URL }}
+      VAULT_ROLE_ID: ${{ secrets.VAULT_ROLE_ID }}
+      VAULT_SECRET_ID: ${{ secrets.VAULT_SECRET_ID }}

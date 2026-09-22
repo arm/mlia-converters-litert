@@ -70,6 +70,7 @@ repos:
   rev: v2.16.0
   hooks:
   - id: pretty-format-toml
+    additional_dependencies: ["toml-sort==0.25.0"]
     args: [--autofix, "--no-sort", --indent, "4"]
     exclude: ^uv\.lock$
 
