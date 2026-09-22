@@ -25,23 +25,22 @@ Install the documentation dependencies in your environment, then build from the
 repository root:
 
 ```bash
-uv sync --no-install-project --group docs
-uv run mkdocs build --strict
+uv sync --no-sources --no-install-project --only-group docs
+uv run --no-sync mkdocs build --strict
 ```
 
 For local preview:
 
 ```bash
-uv run mkdocs serve
+uv run --no-sync mkdocs serve
 ```
 
 The generated site will be written to `.mkdocs/site/`.
 
 ## Scope
 
-These docs focus on the LiteRT / TensorFlow Lite `.tflite`-to-TOSA conversion
-path packaged by this split
-repo.
+These docs cover the LiteRT / TensorFlow Lite `.tflite`-to-TOSA conversion path
+provided by `mlia-converters-litert`.
 
 ## Relationship to the core and target repos
 

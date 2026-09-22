@@ -17,7 +17,7 @@ converted artifacts.
 Use `uv` to create and sync the development environment:
 
 ```bash
-uv sync --dev
+uv sync --group dev
 ```
 
 ## Common commands

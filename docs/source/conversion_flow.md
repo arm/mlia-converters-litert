@@ -26,8 +26,8 @@ as a destination in its own right.
 
 ## Output format
 
-The default route writes text MLIR with a `.tosamlir` suffix. Workflows that
-request bytecode output receive a `.tosa.mlirbc` artifact instead.
+The default route writes MLIR bytecode with a `.tosa.mlirbc` suffix. Workflows
+that request `mlir-text` output receive a `.tosamlir` artifact instead.
 
 ## Maintenance considerations
 

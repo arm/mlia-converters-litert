@@ -12,7 +12,7 @@ by MLIA.
 
 ## Included plugins
 
-- `tflite_to_tosa`: LiteRT / TensorFlow Lite `.tflite`-to-TOSA converter backend
+- `tflite_to_tosa`: LiteRT / TensorFlow Lite `.tflite`-to-TOSA transformer
 
 ## Documentation Map
 

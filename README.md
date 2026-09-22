@@ -22,6 +22,7 @@ entry-point system.
 - [Reporting bugs](#reporting-bugs)
 - [Development (uv)](#development-uv)
 - [Documentation](#documentation)
+- [Releases](#releases)
 - [License](#license)
 - [Trademarks and copyrights](#trademarks-and-copyrights)
 
@@ -31,9 +32,6 @@ This plugin provides the conversion bridge between LiteRT / TensorFlow Lite
 `.tflite` model files and TOSA-based MLIA backends. It gives the wider MLIA
 ecosystem a dedicated package for `.tflite`-to-TOSA conversion and keeps
 converter logic separate from the core MLIA framework.
-
-LiteRT migration does not change MLIA’s `.tflite` input handling; this plugin
-continues to convert `.tflite` models to TOSA.
 
 The implementation package lives under
 `src/mlia/backend/tosa_converter_for_tflite/` and includes:
@@ -62,11 +60,12 @@ pip install mlia-converters-litert
 For source-based development with `uv`:
 
 ```bash
-uv sync --dev
+uv sync --group dev
 ```
 
-The project requires Python 3.10 and keeps its direct dependency surface small,
-with `mlia` as the primary runtime dependency.
+The project supports the Python versions declared in `pyproject.toml` and keeps
+its direct dependency surface small, with MLIA as the primary runtime
+dependency.
 
 ## How MLIA uses this plugin
 
@@ -74,11 +73,10 @@ MLIA discovers this repository through the `mlia.plugin.transformer` entry
 point. When installed, the plugin registers the transformer name
 `tflite_to_tosa`.
 
-This is the important naming split:
+The package and transformer use different names:
 
-- `tflite_to_tosa` is the transformer name used in MLIA configuration and API
-  or CLI flows
-- `tosa_converter_for_tflite` is the implementation package name used in the codebase.
+- `tflite_to_tosa` is the transformer name used in MLIA workflows.
+- `tosa_converter_for_tflite` is the Python implementation package.
 
 That means downstream MLIA components can:
 
@@ -96,15 +94,15 @@ Report bugs by creating GitHub issues. Use the
 
 Only open an issue in
 [`arm/mlia-converters-litert`](https://github.com/arm/mlia-converters-litert/issues)
-when the bug is clearly and specifically in this TFLite converter plugin.
+when the bug is clearly and specifically in this LiteRT converter plugin.
 
 ## Development (uv)
 
 This repository uses `uv` for environment management and test execution. Ensure
-Python 3.10 is available (see `.python-version`), then install dependencies:
+the Python version in `.python-version` is available, then install dependencies:
 
 ```bash
-uv sync --dev
+uv sync --group dev
 ```
 
 Run unit tests (uses dependencies installed from the package index, including `mlia`):
@@ -131,15 +129,14 @@ Build a wheel:
 uv build --wheel
 ```
 
-## CI Parity With mlia-core
-
-CI jobs follow the same structure as mlia-core (lint/build/test_quick) and use
-uv-based commands. Deviations are documented in the workflow files where the
-repo lacks equivalent tooling (for example, pre-commit configuration).
-
 ## Documentation
 
 Additional repository documentation lives in [docs/README.md](docs/README.md).
+
+## Releases
+
+Latest changes and release history can be found in
+[MLIA LiteRT Converter releases](https://github.com/arm/mlia-converters-litert/releases).
 
 ## License
 

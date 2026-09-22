@@ -23,7 +23,7 @@ In the normal path, MLIA selects the converter automatically when the input and
 downstream backend require it:
 
 ```bash
-mlia check model.tflite --target-profile <target-profile> --performance
+mlia check my_model.tflite --target-profile neural-technology --performance
 ```
 
 ## Debug the conversion path
@@ -33,10 +33,10 @@ backend and let MLIA choose the `.tflite` transformer when it needs a TOSA
 artifact:
 
 ```bash
-mlia check model.tflite \
-  --target-profile <target-profile> \
+mlia check my_model.tflite \
+  --target-profile neural-technology \
   --performance \
-  --backend <downstream-backend>
+  --backend nx-performance-estimator
 ```
 
 ## Practical debugging sequence

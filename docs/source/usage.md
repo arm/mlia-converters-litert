@@ -8,17 +8,14 @@ SPDX-License-Identifier: Apache-2.0
 ## Overview
 
 This package registers the transformer name `tflite_to_tosa` through the
-`mlia.plugin.transformer` entry point. The implementation is provided by
-`TFLiteToTosaConverterPlugin` in
-`src/mlia/backend/tosa_converter_for_tflite/converter_plugin.py`.
+`mlia.plugin.transformer` entry point.
 
 ## Naming convention
 
 This repo uses two names that matter in different places:
 
-- `tflite_to_tosa`: the transformer name exposed to MLIA and used in API or
-  CLI-facing flows
-- `tosa_converter_for_tflite`: the implementation package name used in the codebase.
+- `tflite_to_tosa`: the transformer name exposed to MLIA workflows.
+- `tosa_converter_for_tflite`: the Python implementation package.
 
 ## Integration model
 
@@ -40,11 +37,11 @@ The converter usually participates in a larger MLIA flow:
 
 The transformer supports two output formats:
 
-- `mlir-text`, which writes a `.tosamlir` artifact and is the default.
-- `mlir-bytecode`, which writes a `.tosa.mlirbc` artifact.
+- `mlir-bytecode`, which writes a `.tosa.mlirbc` artifact and is the default.
+- `mlir-text`, which writes a `.tosamlir` artifact.
 
-MLIA may also pass `emit_debug_info`; the option is accepted for workflow
-compatibility, but the current wrapper does not add a converter flag for it.
+When `emit_debug_info` is enabled, the plugin passes `--emit-debug-info` to the
+underlying converter.
 
 ## Source layout
 

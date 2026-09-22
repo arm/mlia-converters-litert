@@ -64,8 +64,8 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-      - run: uv sync --no-install-project --no-sources --group docs
-      - run: uv run mkdocs build --strict --no-directory-urls
+      - run: uv sync --no-install-project --no-sources --only-group docs
+      - run: uv run --no-sync mkdocs build --strict --no-directory-urls
       - name: Upload docs artifact
         uses: actions/upload-artifact@v6
         with:

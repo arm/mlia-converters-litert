@@ -1,8 +1,8 @@
 # SPDX-FileCopyrightText: Copyright 2026, Arm Limited and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 
-site_name: MLIA TFLite Converter
-site_description: Documentation for the MLIA TFLite converter plugin.
+site_name: MLIA LiteRT Converter
+site_description: Documentation for the MLIA LiteRT converter plugin.
 site_url: https://arm.github.io/mlia-converters-litert/
 repo_url: https://github.com/arm/mlia-converters-litert
 repo_name: arm/mlia-converters-litert
