@@ -11,7 +11,7 @@
 
 repos:
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v6.0.0
   hooks:
     - id: check-yaml
 
@@ -31,7 +31,7 @@ repos:
       args: ['--maxkb=300', "--enforce-all"]
 
 - repo: https://github.com/asottile/pyupgrade
-  rev: v3.10.1
+  rev: v3.21.2
   hooks:
     - id: pyupgrade
       args: ["--py310-plus"]
@@ -40,28 +40,28 @@ repos:
   rev: 6.3.0
   hooks:
     - id: pydocstyle
-      additional_dependencies: ["tomli==2.0.1"]
+      additional_dependencies: ["tomli==2.4.1"]
 
 - repo: https://github.com/jackdewinter/pymarkdown
-  rev: v0.9.35
+  rev: v0.9.40
   hooks:
     - id: pymarkdown
       args: ["-d", "MD041,MD025,MD024,MD002,MD013", "scan"]
       exclude: '^((AGENTS\.md)|(\.github/prompts|\.github/skills|\.codex/skills|openspec)/)'
 
 - repo: https://github.com/ryanrhee/shellcheck-py
-  rev: v0.9.0.5
+  rev: v0.11.0.1
   hooks:
     - id: shellcheck
       args: [-f, gcc, -x]
 
 - repo: https://github.com/fsfe/reuse-tool
-  rev: v2.1.0
+  rev: v6.2.0
   hooks:
     - id: reuse
 
 - repo: https://github.com/PrincetonUniversity/blocklint
-  rev: v0.2.4
+  rev: v0.3.0
   hooks:
     - id: blocklint
       exclude: pyproject.toml
@@ -84,14 +84,14 @@ repos:
       require_serial: true
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.15.0
+  rev: v0.16.8
   hooks:
     - id: ruff-check
       args: [ --fix ]
     - id: ruff-format
 
 - repo: https://github.com/commitizen-tools/commitizen
-  rev: v3.13.0
+  rev: v4.19.0
   hooks:
     - id: commitizen-branch
       args: [--rev-range, HEAD~1..HEAD]

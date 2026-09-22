@@ -82,7 +82,7 @@ adds a "Signed-off-by" line, required for MLIA contributions.
 
 ### Code reviews
 
-This project follows the conventional GitHub pull request flow. See [here](https://docs.github.com/en/pull-requests)
+This project follows the conventional GitHub pull request flow. See [GitHub pull request documentation](https://docs.github.com/en/pull-requests)
 for details of how to create a pull request.
 
 Contributions must go through code review on GitHub. Only reviewed contributions

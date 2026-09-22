@@ -3,8 +3,8 @@
 
 [build-system]
 requires = [
-    "hatchling>=1.27.0",
-    "uv-dynamic-versioning>=0.8.2,<0.9.0"
+    "hatchling==1.32.4",
+    "uv-dynamic-versioning==0.14.1"
 ]
 build-backend = "hatchling.build"
 
@@ -27,7 +27,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence"
 ]
 dependencies = [
-    "mlia>=0.12.0,<0.13",
+    "mlia==0.12.2",
     "tosa-converter-for-tflite==2026.2.0"
 ]
 
@@ -75,27 +75,31 @@ blocklist = ["master", "slave", "blacklist", "whitelist", "dummy"]
 wordlist = ["he", "she", "him", "her", "his", "hers"]
 skip_files = ["LICENSES/Apache-2.0.txt", "docs/source/conf.py", "pyproject.toml"]
 
+# Keep the existing lint rules when upgrading Ruff.
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+
 [tool.mypy]
 # Suppress errors for optional dependencies and cross-repo imports.
 ignore_missing_imports = true
 
 [dependency-groups]
 test = [
-    "pytest==9.1.0",
-    "flaky~=3.8.1",
+    "pytest==9.1.1",
+    "flaky==3.8.1",
     "pytest-cov==7.1.0",
-    "hatchling>=1.27.0"
+    "hatchling==1.32.4"
 ]
 dev = [
     { include-group = "test" },
-    "mypy==1.5.1",
-    "pre-commit==4.5.1",
-    "blocklint",
-    "build~=1.2.1",
-    "tomli>=2.0.1; python_version<'3.11'"
+    "mypy==2.3.1",
+    "pre-commit==4.6.2",
+    "blocklint==0.3.0",
+    "build==1.6.1",
+    "tomli==2.4.1; python_version<'3.11'"
 ]
 docs = [
-    "mkdocs>=1.6,<2.0",
-    "mkdocs-material>=9.5,<10.0",
-    "pymdown-extensions>=10.0,<11.0"
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.7.7",
+    "pymdown-extensions==12.0.1"
 ]

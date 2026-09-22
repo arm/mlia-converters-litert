@@ -17,9 +17,7 @@ from mlia.backend.tosa_converter_for_tflite.conversion import TosaConverterForTf
 
 # mypy: disable-error-code=misc
 @pytest.fixture(name="tosa_converter_for_tflite")
-def fixture_tosa_converter_for_tflite() -> Generator[
-    TosaConverterForTflite, None, None
-]:
+def fixture_tosa_converter_for_tflite() -> Generator[TosaConverterForTflite]:
     """Create an instance of the TOSA Converter for TFLite."""
     tosa_converter_for_tflite = TosaConverterForTflite()
     yield tosa_converter_for_tflite
