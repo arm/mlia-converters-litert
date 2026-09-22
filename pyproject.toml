@@ -10,9 +10,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mlia-converters-litert"
-dynamic = ["version"]
+dynamic = ["version", "readme"]
 description = "ML Inference Advisor LiteRT Converter Plugin"
-readme = "README.md"
 requires-python = ">=3.10,<3.14"
 license = "Apache-2.0"
 license-files = ["LICENSES/*.txt"]
@@ -41,6 +40,9 @@ tflite_to_tosa = "mlia.backend.tosa_converter_for_tflite.converter_plugin:TFLite
 [tool.hatch.version]
 source = "uv-dynamic-versioning"
 
+[tool.hatch.metadata.hooks.custom]
+path = "hatch_build.py"
+
 [tool.hatch.build.targets.wheel]
 # Include implicit namespace packages under src/.
 only-include = ["src/mlia"]
@@ -50,7 +52,9 @@ exclude = ["src/mlia/_vendor/**"]
 [tool.hatch.build.targets.sdist]
 include = [
     "src/mlia/**",
-    "LICENSES/*.txt"
+    "LICENSES/*.txt",
+    "README.md",
+    "hatch_build.py"
 ]
 exclude = ["src/mlia/_vendor/**"]
 
@@ -79,7 +83,8 @@ ignore_missing_imports = true
 test = [
     "pytest==9.1.0",
     "flaky~=3.8.1",
-    "pytest-cov==7.1.0"
+    "pytest-cov==7.1.0",
+    "hatchling>=1.27.0"
 ]
 dev = [
     {include-group = "test"},
