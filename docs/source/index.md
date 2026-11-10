@@ -1,7 +1,9 @@
-<!---
-SPDX-FileCopyrightText: Copyright 2026, Arm Limited and/or its affiliates.
-SPDX-License-Identifier: Apache-2.0
---->
+---
+# SPDX-FileCopyrightText: Copyright 2026, Arm Limited and/or its affiliates.
+# SPDX-License-Identifier: Apache-2.0
+sidebar_position: 1
+slug: /documentation
+---
 
 # MLIA LiteRT Converter
 
@@ -22,3 +24,6 @@ by MLIA.
 - [CLI examples](cli.md)
 - [Troubleshooting](troubleshooting.md)
 - [Development](development.md)
+
+For shared CLI, installation, and plugin architecture guidance, see the
+[MLIA core documentation](https://developer.arm.com/dev-docs/mlia/).

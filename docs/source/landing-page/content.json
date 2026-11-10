@@ -1,0 +1,53 @@
+{
+  "title": "LiteRT Converter",
+  "headline": "Bring LiteRT into the flow.",
+  "lead": "Convert supported TensorFlow Lite models into TOSA-oriented artifacts for downstream MLIA backends.",
+  "category": "Converter plugin",
+  "start": "/usage",
+  "focus": [
+    {
+      "title": "Integrate with MLIA",
+      "description": "Discover how the tflite_to_tosa transformer is registered.",
+      "to": "/usage"
+    },
+    {
+      "title": "Follow the conversion",
+      "description": "Trace a .tflite model into the TOSA-oriented path.",
+      "to": "/conversion_flow"
+    },
+    {
+      "title": "Inspect the artifacts",
+      "description": "Understand MLIR text, bytecode, and diagnostics.",
+      "to": "/conversion_outputs"
+    }
+  ],
+  "note": "This converter runs within MLIA workflows; it is not a separate analysis command.",
+  "learning": null,
+  "repository": "https://github.com/arm/mlia-converters-litert",
+  "guides": [
+    {
+      "title": "Usage and Integration",
+      "to": "/usage"
+    },
+    {
+      "title": "Conversion Outputs and Diagnostics",
+      "to": "/conversion_outputs"
+    },
+    {
+      "title": "Conversion Flow",
+      "to": "/conversion_flow"
+    },
+    {
+      "title": "Troubleshooting",
+      "to": "/troubleshooting"
+    },
+    {
+      "title": "CLI Guide",
+      "to": "/cli"
+    },
+    {
+      "title": "Development",
+      "to": "/development"
+    }
+  ]
+}
