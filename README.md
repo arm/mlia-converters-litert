@@ -13,12 +13,14 @@ The package is distributed as `mlia-converters-litert`. When installed, it
 registers the transformer name `tflite_to_tosa` with MLIA through the plugin
 entry-point system.
 
+[Read the documentation on Arm Developer](https://developer.arm.com/dev-docs/mlia-converters-litert/).
+
 ## Table of Contents
 
 - [Overview](#overview)
-- [Repository contents](#repository-contents)
 - [Installation](#installation)
 - [How MLIA uses this plugin](#how-mlia-uses-this-plugin)
+- [Repository contents](#repository-contents)
 - [Reporting bugs](#reporting-bugs)
 - [Development (uv)](#development-uv)
 - [Documentation](#documentation)
@@ -39,15 +41,6 @@ The implementation package lives under
 - Conversion logic.
 - Transformer registration.
 - Backend installation metadata used by MLIA.
-
-## Repository contents
-
-- `src/mlia/backend/tosa_converter_for_tflite/`: implementation package and
-  plugin registration.
-- `tests/`: unit tests for converter registration and conversion behaviour.
-- `pre_commit_hooks/`: local repository hooks shared with CI quality checks.
-- `pyproject.toml`: package metadata, including the public
-  `tosa-converter-for-tflite` dependency.
 
 ## Installation
 
@@ -86,6 +79,15 @@ That means downstream MLIA components can:
 - Treat the converter as a separately versioned plugin package.
 
 For more implementation detail, see [docs/README.md](docs/README.md).
+
+## Repository contents
+
+- `src/mlia/backend/tosa_converter_for_tflite/`: implementation package and
+  plugin registration.
+- `tests/`: unit tests for converter registration and conversion behaviour.
+- `pre_commit_hooks/`: local repository hooks shared with CI quality checks.
+- `pyproject.toml`: package metadata, including the public
+  `tosa-converter-for-tflite` dependency.
 
 ## Reporting bugs
 
@@ -130,8 +132,6 @@ uv build --wheel
 ```
 
 ## Documentation
-
-[Read the documentation on Arm Developer](https://developer.arm.com/dev-docs/mlia-converters-litert/).
 
 Additional repository documentation lives in [docs/README.md](docs/README.md).
 
