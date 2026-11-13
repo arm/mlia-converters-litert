@@ -6,9 +6,9 @@
   "start": "/usage",
   "focus": [
     {
-      "title": "Integrate with MLIA",
-      "description": "Discover how the tflite_to_tosa transformer is registered.",
-      "to": "/usage"
+      "title": "Pair with a target plugin",
+      "description": "Install a target plugin for the hardware you want to analyze, then add this converter for LiteRT inputs.",
+      "to": "https://developer.arm.com/dev-docs/mlia/documentation/#targets-converters-and-visualization"
     },
     {
       "title": "Follow the conversion",

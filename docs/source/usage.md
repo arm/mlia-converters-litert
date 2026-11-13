@@ -6,6 +6,17 @@ sidebar_position: 2
 
 # Usage and Integration
 
+## Installation
+
+Start with a [target plugin](https://developer.arm.com/dev-docs/mlia/documentation/#targets-converters-and-visualization)
+for the hardware you want to analyze. It installs MLIA as a dependency. Add this
+converter in the same Python environment only if your workflow needs LiteRT
+conversion. A converter alone cannot provide target-specific analysis.
+
+```bash
+pip install mlia-converters-litert
+```
+
 ## Overview
 
 This package registers the transformer name `tflite_to_tosa` through the
@@ -20,10 +31,10 @@ This repo uses two names that matter in different places:
 
 ## Integration model
 
-The repository is designed to be installed alongside `mlia`, not used as a
-standalone CLI tool. Once installed, MLIA can discover the converter and route
-LiteRT / TensorFlow Lite `.tflite` conversion requests through the transformer
-registry.
+This package adds conversion to an MLIA workflow with a target plugin. It does
+not provide a standalone analysis command. Once installed, MLIA can discover
+the converter and route LiteRT / TensorFlow Lite `.tflite` conversion requests
+through the transformer registry.
 
 ## Typical workflow
 
