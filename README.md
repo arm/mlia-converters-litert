@@ -59,9 +59,18 @@ For source-based development with `uv`:
 uv sync --group dev
 ```
 
-The project supports the Python versions declared in `pyproject.toml` and keeps
-its direct dependency surface small, with MLIA as the primary runtime
-dependency.
+The first check that needs TFLite-to-TOSA conversion installs the converter and
+its dependencies in a separate Python environment. They are not installed into
+your MLIA environment. To install the converter ahead of a check:
+
+```bash
+mlia backend install tosa-converter-for-tflite
+```
+
+Use `mlia backend list --runtimes` to inspect available converter versions and
+`--show-plan` on a check to see which one it will use. A target's default
+profile selects the appropriate converter; `--execution-profile` selects a
+different supplied combination.
 
 ## How MLIA uses this plugin
 
@@ -89,8 +98,8 @@ For more implementation detail, see [docs/README.md](docs/README.md).
   plugin registration.
 - `tests/`: unit tests for converter registration and conversion behaviour.
 - `pre_commit_hooks/`: local repository hooks shared with CI quality checks.
-- `pyproject.toml`: package metadata, including the public
-  `tosa-converter-for-tflite` dependency.
+- `pyproject.toml`: plugin package metadata.
+- `runtime/litert/pyproject.toml`: converter dependency versions.
 
 ## Reporting bugs
 

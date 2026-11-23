@@ -6,11 +6,12 @@ from __future__ import annotations
 
 from collections.abc import Generator
 from pathlib import Path
+import sys
+from types import ModuleType
 from unittest.mock import MagicMock
 
 import pytest
 
-from mlia.backend.install import DownloadAndInstall, InstallFromVendorPackage
 from mlia.backend.tosa_converter_for_tflite import install as tosa_install
 from mlia.backend.tosa_converter_for_tflite.conversion import TosaConverterForTflite
 
@@ -166,50 +167,32 @@ def test_tosa_converter_for_tflite_front_end_no_output(
         tosa_converter_for_tflite(model_file, output_dir)
 
 
-def test_tosa_converter_for_tflite_installation_uses_public_package(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Install metadata should target the public package, not a vendored wheel."""
-    package_manager = MagicMock()
-    monkeypatch.setattr(
-        "mlia.backend.install.get_package_manager", lambda: package_manager
+def test_backend_installation_uses_isolated_runtime() -> None:
+    """The backend alias selects a runtime instead of a frontend package installer."""
+    from mlia.backend.registry import BackendRegistry
+    from mlia.backend.tosa_converter_for_tflite.plugin import LiteRTBackendPlugin
+    from mlia.runtime.catalog import default_backend_runtime
+
+    registry = BackendRegistry()
+    LiteRTBackendPlugin.register(registry)
+    config = registry.items["tosa-converter-for-tflite"]
+    assert config.installation is None
+    assert config.runtime_operation == "litert/tflite-to-tosa"
+    definition = default_backend_runtime(
+        "tosa-converter-for-tflite", config.runtime_operation
     )
-
-    installation = tosa_install.get_tosa_converter_for_tflite_backend_installation()
-
-    assert not installation.supports(InstallFromVendorPackage())
-    assert installation.supports(DownloadAndInstall())
-
-    installation.install(DownloadAndInstall())
-
-    package_manager.install.assert_called_once_with(
-        ["tosa-converter-for-tflite==2026.2.0"]
-    )
-
-
-def test_ensure_tosa_converter_for_tflite_installed_resolves_executable(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Return the executable when it is already on PATH."""
-    monkeypatch.setattr(
-        tosa_install,
-        "_resolve_executable",
-        lambda *_: "/tmp/tosa-converter-for-tflite",
-    )
-    monkeypatch.setattr(tosa_install, "_module_available", lambda *_: False)
-    tosa_install.ensure_tosa_converter_for_tflite_installed.cache_clear()
-
-    assert tosa_install.ensure_tosa_converter_for_tflite_installed() == (
-        "/tmp/tosa-converter-for-tflite",
-    )
+    assert definition.name.startswith("arm/litert/public@")
 
 
 def test_ensure_tosa_converter_for_tflite_installed_module_available(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Return module invocation when the console script is missing."""
-    monkeypatch.setattr(tosa_install, "_resolve_executable", lambda *_: None)
-    monkeypatch.setattr(tosa_install, "_module_available", lambda *_: True)
+    """Invoke the installed converter with this environment's Python."""
+    monkeypatch.setitem(
+        sys.modules,
+        "tosa_converter_for_tflite.cli",
+        ModuleType("tosa_converter_for_tflite.cli"),
+    )
     tosa_install.ensure_tosa_converter_for_tflite_installed.cache_clear()
 
     assert tosa_install.ensure_tosa_converter_for_tflite_installed() == (
@@ -219,32 +202,16 @@ def test_ensure_tosa_converter_for_tflite_installed_module_available(
     )
 
 
-def test_ensure_tosa_converter_for_tflite_installed_public_package_install(
+def test_missing_converter_reports_repair_command(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Install public package when no executable or module is available."""
-    resolve = MagicMock(side_effect=[None, "/tmp/tosa-converter-for-tflite"])
-    monkeypatch.setattr(tosa_install, "_resolve_executable", resolve)
-    monkeypatch.setattr(tosa_install, "_module_available", lambda *_: False)
-    monkeypatch.setattr(tosa_install.importlib, "invalidate_caches", MagicMock())
-
-    installation = MagicMock()
-    installation.supports.side_effect = lambda install_type: isinstance(
-        install_type, DownloadAndInstall
-    )
-    installation.install = MagicMock()
-    monkeypatch.setattr(
-        tosa_install,
-        "get_tosa_converter_for_tflite_backend_installation",
-        lambda: installation,
-    )
-
+    """Tell users which backend to reinstall when its converter cannot be imported."""
+    monkeypatch.setitem(sys.modules, "tosa_converter_for_tflite.cli", None)
     tosa_install.ensure_tosa_converter_for_tflite_installed.cache_clear()
-    result = tosa_install.ensure_tosa_converter_for_tflite_installed()
-
-    assert result == ("/tmp/tosa-converter-for-tflite",)
-    installation.install.assert_called_once()
-    assert isinstance(installation.install.call_args.args[0], DownloadAndInstall)
+    with pytest.raises(
+        RuntimeError, match="mlia backend install tosa-converter-for-tflite --force"
+    ):
+        tosa_install.ensure_tosa_converter_for_tflite_installed()
 
 
 def test_tosa_converter_for_tflite_module_available_missing_parent(

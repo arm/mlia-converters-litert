@@ -40,10 +40,14 @@ sidebar_position: 6
 
 ### Environment mismatch
 
-- Recreate the environment and reinstall dependencies from the repo's declared
-  configuration.
-- Check whether the active environment contains the expected MLIA and converter
-  package versions.
+- The frontend needs `mlia-converters-litert`; the converter's dependencies belong
+  in the selected runtime environment.
+- Use `mlia backend list --runtimes` to find that environment. Inspect it without
+  activation using `uv pip list --python /path/to/runtime/venv/bin/python`.
+- Repair the default converter with
+  `mlia backend install tosa-converter-for-tflite --force`. For a custom selection,
+  use its full runtime name instead of the backend name.
+- Read the installation or worker log named in the error before retrying.
 
 ## Escalation path
 

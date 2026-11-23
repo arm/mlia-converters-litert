@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright 2026, Arm Limited and/or its affiliates.
+# SPDX-License-Identifier: Apache-2.0
+
+schema_version = 1
+id = "arm/litert-tflite"
+backend = "tosa-converter-for-tflite"
+inputs = ["tflite"]
+default = true
+
+[stages.convert]
+operation = "litert/tflite-to-tosa"
+runtime = "arm/litert/public@{version}"
+provider_package = "mlia-converters-litert"

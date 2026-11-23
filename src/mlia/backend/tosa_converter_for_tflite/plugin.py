@@ -6,10 +6,6 @@ from mlia.backend.config import BackendConfiguration, BackendType, System
 from mlia.backend.registry import BackendRegistry
 from mlia.plugins.plugins import BackendPlugin
 
-from mlia.backend.tosa_converter_for_tflite.install import (
-    get_tosa_converter_for_tflite_backend_installation,
-)
-
 
 class LiteRTBackendPlugin(BackendPlugin):
     """Describe the LiteRT backend's capabilities and installation requirements."""
@@ -25,7 +21,8 @@ class LiteRTBackendPlugin(BackendPlugin):
                 supported_advice=[],
                 supported_systems=[System.LINUX_AMD64],
                 backend_type=BackendType.WHEEL,
-                installation=get_tosa_converter_for_tflite_backend_installation(),
+                installation=None,
+                runtime_operation="litert/tflite-to-tosa",
                 selectable=False,
             ),
             pretty_name="TOSA converter for tflite",

@@ -3,6 +3,7 @@
 
 [build-system]
 requires = [
+    "mlia>=0.13.2.dev4,<0.14.0",
     "hatchling==1.32.4",
     "uv-dynamic-versioning==0.14.1"
 ]
@@ -26,10 +27,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Topic :: Scientific/Engineering :: Artificial Intelligence"
 ]
-dependencies = [
-    "mlia>=0.13.2.dev4,<0.14.0",
-    "tosa-converter-for-tflite==2026.2.0"
-]
+dependencies = ["mlia>=0.13.2.dev4,<0.14.0"]
 
 [project.urls]
 Homepage = "https://github.com/arm/mlia-converters-litert.git"
@@ -46,20 +44,43 @@ source = "uv-dynamic-versioning"
 [tool.hatch.metadata.hooks.custom]
 path = "hatch_build.py"
 
+[tool.hatch.build.hooks.custom]
+path = "runtime/hatch_runtime.py"
+
 [tool.hatch.build.targets.wheel]
 # Include implicit namespace packages under src/.
 only-include = ["src/mlia"]
 sources = ["src"]
-exclude = ["src/mlia/_vendor/**"]
+exclude = [
+    "src/mlia/**/worker.py",
+    "src/mlia/resources/runtimes/**",
+    "src/mlia/_vendor/**"
+]
 
 [tool.hatch.build.targets.sdist]
 include = [
     "src/mlia/**",
+    "runtime/**",
     "LICENSES/*.txt",
     "README.md",
     "hatch_build.py"
 ]
-exclude = ["src/mlia/_vendor/**"]
+exclude = ["src/mlia/resources/runtimes/**", "src/mlia/_vendor/**"]
+
+[tool.uv]
+# Editable wheels contain generated runtime bundles. Track their authored inputs,
+# excluding build/ and runtime/inputs so preparation does not invalidate itself.
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "hatch_build.py" },
+    { file = "runtime/*.py" },
+    { file = "runtime/*.json" },
+    { file = "runtime/*/pyproject.toml" },
+    { file = "src/mlia/**/*.py" },
+    { file = "src/mlia/resources/**/*" },
+    { file = "LICENSES/*.txt" },
+    { git = { commit = true, tags = true } }
+]
 
 [tool.uv-dynamic-versioning]
 vcs = "git"
@@ -106,3 +127,7 @@ docs = [
     "mkdocs-material==9.7.7",
     "pymdown-extensions==12.0.1"
 ]
+
+# Worker code is exercised by installed-runtime E2E tests, outside frontend coverage.
+[tool.coverage.run]
+omit = ["*/worker.py"]

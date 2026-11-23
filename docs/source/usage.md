@@ -55,11 +55,18 @@ The transformer supports two output formats:
 When `emit_debug_info` is enabled, the plugin passes `--emit-debug-info` to the
 underlying converter.
 
-## Source layout
+## Installation and selection
 
-- `conversion.py`: conversion logic.
-- `converter_plugin.py`: MLIA plugin registration.
-- `install.py`: installation metadata for MLIA-managed backend tooling.
+Install `mlia-converters-litert` alongside MLIA and the target plugin. The converter
+itself installs in a separate environment on first use. To install it in advance
+or repair that environment, run:
+
+```bash
+mlia backend install tosa-converter-for-tflite --force
+```
+
+Use `--show-plan` on your check to see the selected converter version. Pass
+`--execution-profile` to choose a compatible alternative toolchain.
 
 ## Cross-links
 
