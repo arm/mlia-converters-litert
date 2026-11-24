@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright 2026, Arm Limited and/or its affiliates.
 # SPDX-License-Identifier: Apache-2.0
 [build-system]
-requires = ["hatchling", "uv-dynamic-versioning", "mlia>=0.13.2.dev4,<0.14.0"]
+requires = ["hatchling", "uv-dynamic-versioning", "mlia>=0.13.2.dev9,<0.14.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -34,9 +34,11 @@ modules = ["mlia.backend.tosa_converter_for_tflite.worker"]
 
 [tool.mlia.runtime]
 id = "arm/litert/public"
+label = "LiteRT conversion runtime"
 python = "3.12"
 architectures = ["x86_64"]
 
 [tool.mlia.runtime.operations."litert/tflite-to-tosa"]
+label = "LiteRT conversion"
 entrypoint = "mlia.backend.tosa_converter_for_tflite.worker:run"
 result_schema = "model/1"
